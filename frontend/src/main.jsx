@@ -4,6 +4,8 @@ import App from './App.jsx';
 import { GiftProvider } from './context/GiftContext.jsx';
 import './index.css';
 
+window.__VITE_LOADED__ = true;
+
 const rootElement = document.getElementById('root');
 if (rootElement) {
   const root = ReactDOM.createRoot(rootElement);

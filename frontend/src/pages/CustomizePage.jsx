@@ -10,6 +10,8 @@ export default function CustomizePage() {
     setCustomGift,
     selectedDesign,
     selectedTheme,
+    cardDesigns = CARD_DESIGNS,
+    cardThemes = CARD_THEMES,
     addToCart,
     setActivePage
   } = useGift();
@@ -37,14 +39,16 @@ export default function CustomizePage() {
   const handleAddToCart = () => {
     const customizedItem = {
       id: `custom-gift-${Date.now()}`,
-      title: `${selectedDesign.name} eGift Card for ${customGift.recipient || 'Someone Special'}`,
-      price: customGift.amount || 50,
+      giftId: customGift.designId || 'custom-card',
+      title: `${selectedDesign?.name || 'Custom'} eGift Card for ${customGift.recipient || 'Someone Special'}`,
+      price: Number(customGift.amount) || 50,
       description: customGift.message || 'Happy gifting!',
-      image: selectedDesign.image,
+      image: selectedDesign?.image || '',
       isCustom: true,
-      recipient: customGift.recipient,
-      message: customGift.message,
-      theme: selectedTheme.name
+      recipient: customGift.recipient || 'Friend',
+      message: customGift.message || '',
+      theme: selectedTheme?.name || 'Soft Cozy',
+      designId: customGift.designId || 'birthday'
     };
     addToCart(customizedItem);
   };
@@ -117,7 +121,7 @@ export default function CustomizePage() {
           </div>
 
           <div className="grid grid-cols-3 gap-3">
-            {CARD_DESIGNS.map((design) => {
+            {cardDesigns.map((design) => {
               const isChecked = customGift.designId === design.id;
               return (
                 <div
@@ -162,7 +166,7 @@ export default function CustomizePage() {
           </div>
 
           <div className="flex gap-4">
-            {CARD_THEMES.map((theme) => {
+            {cardThemes.map((theme) => {
               const isChecked = customGift.themeId === theme.id;
               return (
                 <div
@@ -197,10 +201,11 @@ export default function CustomizePage() {
 
           <div className="space-y-4">
             <div>
-              <label className="block text-xs font-dm-sans font-medium text-on-surface-variant mb-1 ml-1">
+              <label htmlFor="custom_recipient_name" className="block text-xs font-dm-sans font-medium text-on-surface-variant mb-1 ml-1">
                 Recipient Name
               </label>
               <input
+                id="custom_recipient_name"
                 type="text"
                 value={customGift.recipient}
                 onChange={(e) => handleRecipientChange(e.target.value)}
@@ -210,10 +215,11 @@ export default function CustomizePage() {
             </div>
 
             <div>
-              <label className="block text-xs font-dm-sans font-medium text-on-surface-variant mb-1 ml-1">
+              <label htmlFor="custom_recipient_note" className="block text-xs font-dm-sans font-medium text-on-surface-variant mb-1 ml-1">
                 Personalized Note
               </label>
               <textarea
+                id="custom_recipient_note"
                 rows={3}
                 value={customGift.message}
                 onChange={(e) => handleMessageChange(e.target.value)}
@@ -258,6 +264,7 @@ export default function CustomizePage() {
           <div className="relative">
             <span className="absolute left-4 top-1/2 -translate-y-1/2 text-outline font-bold">$</span>
             <input
+              id="custom_gift_amount"
               type="number"
               min="5"
               max="1000"

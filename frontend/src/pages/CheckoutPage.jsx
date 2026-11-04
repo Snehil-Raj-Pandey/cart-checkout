@@ -2,28 +2,38 @@ import React, { useState } from 'react';
 import { useGift } from '../context/GiftContext.jsx';
 
 export default function CheckoutPage() {
-  const { cartItems, removeFromCart, cartTotal, setActivePage, clearCart, showToast } = useGift();
+  const { cartItems, removeFromCart, cartTotal, setActivePage, clearCart, showToast, checkoutOrder } = useGift();
   const [recipientEmail, setRecipientEmail] = useState('');
   const [giftNote, setGiftNote] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
   const [isCompleted, setIsCompleted] = useState(false);
+  const [confirmedOrder, setConfirmedOrder] = useState(null);
 
-  const handleCheckout = (paymentMethod = 'Card') => {
+  const handleCheckout = async (paymentMethod = 'Card') => {
     if (cartItems.length === 0) {
       showToast('Your cart is empty!', 'info');
       return;
     }
-    if (!recipientEmail) {
-      showToast('Please enter recipient email', 'info');
+    if (!recipientEmail || !recipientEmail.includes('@')) {
+      showToast('Please enter a valid recipient email', 'info');
       return;
     }
 
     setIsProcessing(true);
-    setTimeout(() => {
-      setIsProcessing(false);
+    try {
+      const order = await checkoutOrder({
+        recipientEmail,
+        giftNote,
+        paymentMethod
+      });
+      setConfirmedOrder(order);
       setIsCompleted(true);
-      clearCart();
-    }, 1200);
+      showToast('Order confirmed successfully!');
+    } catch (err) {
+      showToast(err.message || 'Checkout failed. Please try again.', 'error');
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   if (isCompleted) {
@@ -37,8 +47,14 @@ export default function CheckoutPage() {
           <h2 className="font-quicksand font-bold text-3xl md:text-4xl text-on-surface mb-3">
             Gift Sent Successfully!
           </h2>
+          {confirmedOrder && confirmedOrder.id && (
+            <div className="mb-4 px-4 py-1.5 rounded-full bg-surface-container text-xs font-mono font-semibold text-primary inline-flex items-center gap-1.5 border border-outline-variant/30">
+              <span className="material-symbols-outlined text-[14px]">receipt_long</span>
+              Receipt ID: {confirmedOrder.id}
+            </div>
+          )}
           <p className="font-dm-sans text-base text-on-surface-variant max-w-md mb-8">
-            Your thoughtful digital gift has been dispatched to <strong>{recipientEmail || 'your friend'}</strong>. A confirmation and tracking receipt has been sent to you.
+            Your thoughtful digital gift has been dispatched to <strong>{recipientEmail || 'your friend'}</strong>. A confirmation receipt has been saved to your account.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-3 w-full max-w-xs">

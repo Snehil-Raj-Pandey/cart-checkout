@@ -1,9 +1,27 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { QUICK_CATEGORIES } from '../../data/mockData.js';
 import { useGift } from '../../context/GiftContext.jsx';
+import { api } from '../../api/client.js';
 
 export default function CategoryChips({ selectedCategory, onSelectCategory }) {
   const { setActivePage } = useGift();
+  const [categories, setCategories] = useState(QUICK_CATEGORIES);
+
+  useEffect(() => {
+    let active = true;
+    async function loadQuickCategories() {
+      try {
+        const quick = await api.getCategories('quick');
+        if (active && Array.isArray(quick) && quick.length > 0) {
+          setCategories(quick);
+        }
+      } catch {
+        // Fallback to local QUICK_CATEGORIES
+      }
+    }
+    loadQuickCategories();
+    return () => { active = false; };
+  }, []);
 
   const handleClick = (id) => {
     if (id === 'all') {
@@ -28,7 +46,7 @@ export default function CategoryChips({ selectedCategory, onSelectCategory }) {
       </div>
 
       <div className="flex overflow-x-auto hide-scrollbar space-x-4 pb-2 -mx-4 px-4 md:mx-0 md:px-0">
-        {QUICK_CATEGORIES.map((cat) => {
+        {categories.map((cat) => {
           const isSelected = selectedCategory === cat.id;
 
           return (

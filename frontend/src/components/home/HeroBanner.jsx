@@ -1,9 +1,27 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { HERO_DATA } from '../../data/mockData.js';
 import { useGift } from '../../context/GiftContext.jsx';
+import { api } from '../../api/client.js';
 
 export default function HeroBanner() {
   const { searchQuery, setSearchQuery, setActivePage } = useGift();
+  const [hero, setHero] = useState(HERO_DATA);
+
+  useEffect(() => {
+    let active = true;
+    async function loadHero() {
+      try {
+        const data = await api.getHeroConfig();
+        if (active && data && data.title) {
+          setHero(data);
+        }
+      } catch {
+        // Fallback to local HERO_DATA
+      }
+    }
+    loadHero();
+    return () => { active = false; };
+  }, []);
 
   return (
     <section className="pt-4 pb-8">
@@ -22,7 +40,7 @@ export default function HeroBanner() {
             Send a Smile<br />Digitally.
           </h2>
           <p className="font-dm-sans text-base md:text-lg text-on-primary-container/80 mb-6 max-w-md">
-            {HERO_DATA.subtitle}
+            {hero.subtitle}
           </p>
 
           {/* Search Bar inside banner */}
@@ -59,8 +77,8 @@ export default function HeroBanner() {
 
         <div className="relative z-10 w-full md:w-1/2 flex justify-center md:justify-end h-64 md:h-80">
           <img
-            src={HERO_DATA.image}
-            alt={HERO_DATA.alt}
+            src={hero.image}
+            alt={hero.alt}
             className="object-contain h-full w-auto drop-shadow-2xl hover:-translate-y-2 transition-transform duration-500"
           />
         </div>

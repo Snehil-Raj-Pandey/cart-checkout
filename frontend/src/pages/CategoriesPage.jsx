@@ -1,13 +1,30 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { VIBE_CATEGORIES } from '../data/mockData.js';
 import { useGift } from '../context/GiftContext.jsx';
+import { api } from '../api/client.js';
 
 export default function CategoriesPage() {
   const { setActivePage, showToast } = useGift();
+  const [categories, setCategories] = useState(VIBE_CATEGORIES);
+
+  useEffect(() => {
+    let active = true;
+    async function loadVibes() {
+      try {
+        const vibes = await api.getCategories('vibe');
+        if (active && Array.isArray(vibes) && vibes.length > 0) {
+          setCategories(vibes);
+        }
+      } catch {
+        // Fallback to local VIBE_CATEGORIES
+      }
+    }
+    loadVibes();
+    return () => { active = false; };
+  }, []);
 
   const handleSelectVibe = (category) => {
-    showToast(`Exploring "${category.title}" collection!`);
-    // Navigate to customize or home
+    showToast(`Exploring "${category.title || category.name}" collection!`);
     setActivePage('customize');
   };
 
@@ -28,7 +45,7 @@ export default function CategoriesPage() {
 
       {/* Categories Bento Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {VIBE_CATEGORIES.map((cat) => (
+        {categories.map((cat) => (
           <div
             key={cat.id}
             onClick={() => handleSelectVibe(cat)}
