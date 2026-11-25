@@ -21,10 +21,10 @@ async function startServer() {
 
     // 3. Create and start Express server
     const app = createApp();
-    const server = app.listen(config.port, () => {
-      logger.info(`Digital Gift Paradise Backend running on port ${config.port}`);
-      logger.info(`Health check: http://localhost:${config.port}/api/health`);
-      logger.info(`API docs & root: http://localhost:${config.port}/`);
+    const server = app.listen(config.port, config.host, () => {
+      logger.info(`Digital Gift Paradise Backend running at http://${config.host}:${config.port}`);
+      logger.info(`Health check: http://${config.host}:${config.port}/api/health`);
+      logger.info(`API docs & root: http://${config.host}:${config.port}/`);
     });
 
     // 4. Graceful Shutdown
